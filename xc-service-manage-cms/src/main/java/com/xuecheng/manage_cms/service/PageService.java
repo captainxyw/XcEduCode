@@ -2,15 +2,19 @@ package com.xuecheng.manage_cms.service;
 
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
+import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
+import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.Optional;
 
 @Service
 public class PageService {
@@ -58,5 +62,67 @@ public class PageService {
         queryResult.setTotal(all.getTotalElements());
         QueryResponseResult queryResponseResult = new QueryResponseResult(CommonCode.SUCCESS, queryResult);
         return queryResponseResult;
+    }
+    //新增页面
+    public CmsPageResult add(CmsPage cmsPage) {
+        //校验页面名称、站点id、页面webpath的唯一性
+        CmsPage cmsPage1 = cmsPageRepository.findByPageNameAndSiteIdAndPageWebPath(cmsPage.getPageName(),
+                cmsPage.getSiteId(), cmsPage.getPageWebPath());
+        if(cmsPage1 == null) {
+            //嗲用dao新增页面
+            cmsPage.setPageId(null);
+            cmsPageRepository.save(cmsPage);
+            return new CmsPageResult(CommonCode.SUCCESS, cmsPage);
+        }
+        //添加失败
+        return new CmsPageResult(CommonCode.FAIL, null);
+    }
+
+    //根据页面id查询页面
+    public CmsPage getById(String id) {
+        Optional<CmsPage> optional = cmsPageRepository.findById(id);
+        if(optional.isPresent()) {
+            CmsPage cmsPage = optional.get();
+            return cmsPage;
+        }
+        return null;
+    }
+
+    //修改页面
+    public CmsPageResult update(String id, CmsPage cmsPage) {
+        //根据id从数据库查询信息
+        CmsPage one = this.getById(id);
+        if(one != null) {
+            //修改数据为了安全性，这里还是建议每个字段单独设置
+            //更新模板id
+            one.setTemplateId(cmsPage.getTemplateId());
+            //更新所属站点
+            one.setSiteId(cmsPage.getSiteId());
+            //更新页面别名
+            one.setPageAliase(cmsPage.getPageAliase());
+            //更新页面名称
+            one.setPageName(cmsPage.getPageName());
+            //更新访问路径
+            one.setPageWebPath(cmsPage.getPageWebPath());
+            //更新物理路径
+            one.setPagePhysicalPath(cmsPage.getPagePhysicalPath());
+            CmsPage save = cmsPageRepository.save(one);
+            if(save != null){
+                return new CmsPageResult(CommonCode.SUCCESS, save);
+            }
+        }
+        //修改失败
+        return new CmsPageResult(CommonCode.FAIL, null);
+    }
+
+    //根据id删除页面
+    public ResponseResult delete(String id) {
+        //先查询
+        Optional<CmsPage> optional = cmsPageRepository.findById(id);
+        if(optional.isPresent()) {
+            cmsPageRepository.deleteById(id);
+            return new ResponseResult(CommonCode.SUCCESS);
+        }
+        return new ResponseResult(CommonCode.FAIL);
     }
 }
