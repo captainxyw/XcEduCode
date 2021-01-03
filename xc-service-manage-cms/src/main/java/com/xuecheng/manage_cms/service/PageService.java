@@ -2,7 +2,10 @@ package com.xuecheng.manage_cms.service;
 
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
+import com.xuecheng.framework.domain.cms.response.CmsCode;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
+import com.xuecheng.framework.exception.CustomException;
+import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
@@ -68,14 +71,14 @@ public class PageService {
         //校验页面名称、站点id、页面webpath的唯一性
         CmsPage cmsPage1 = cmsPageRepository.findByPageNameAndSiteIdAndPageWebPath(cmsPage.getPageName(),
                 cmsPage.getSiteId(), cmsPage.getPageWebPath());
-        if(cmsPage1 == null) {
-            //嗲用dao新增页面
-            cmsPage.setPageId(null);
-            cmsPageRepository.save(cmsPage);
-            return new CmsPageResult(CommonCode.SUCCESS, cmsPage);
+        if(cmsPage1 != null) {
+            //页面已经存在，抛出异常，非法参数异常
+            ExceptionCast.cast(CmsCode.CMS_ADDPAGE_EXISTSNAME);
         }
-        //添加失败
-        return new CmsPageResult(CommonCode.FAIL, null);
+        //嗲用dao新增页面
+        cmsPage.setPageId(null);
+        cmsPageRepository.save(cmsPage);
+        return new CmsPageResult(CommonCode.SUCCESS, cmsPage);
     }
 
     //根据页面id查询页面
