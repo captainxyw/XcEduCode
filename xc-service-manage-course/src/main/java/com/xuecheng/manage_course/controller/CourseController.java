@@ -8,6 +8,10 @@ import com.xuecheng.manage_course.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @author Administrator
+ * @version 1.0
+ **/
 @RestController
 @RequestMapping("/course")
 public class CourseController implements CourseControllerApi {
@@ -23,7 +27,8 @@ public class CourseController implements CourseControllerApi {
 
     @Override
     @PostMapping("/teachplan/add")
-    public ResponseResult addTeachplan(@RequestBody Teachplan teachplan) {
+    public ResponseResult addTeachplan(@RequestBody  Teachplan teachplan) {
+
         return courseService.addTeachplan(teachplan);
     }
 }
