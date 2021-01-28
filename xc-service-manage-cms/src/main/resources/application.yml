@@ -17,3 +17,13 @@ spring:
     cache: false #关闭模板缓存，方便测试
     settings:
       template_update_delay: 0
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://eureka01:50101/eureka/,http://eureka02:50102/eureka/}
+  instance:
+    prefer-ip-address: true
+    ip-address: ${IP_ADDRESS:127.0.0.1}
+    instance-id: ${spring.application.name}:${server.port}
